@@ -1,27 +1,39 @@
 # app.py
 # In this module we build the Gradio user interface.
-# We keep the UI layer completely separate from the logic
-# so the pipeline can be reused or tested independently.
+# We now display the retrieved similar reviews alongside the explanation
+# so the user can see the RAG system working in real time.
 
 import gradio as gr
 from pipeline import run_pipeline
 
-# We store the analysis history in memory for the current session
+# We keep the session history in memory during the app's lifetime
 history = []
 
 
-# We define the main function that the Gradio interface will call
+# We define the main analysis function called by the Gradio interface
 def analyze(text):
     if not text.strip():
-        return 'Please enter a review.', 0, {}, '', '', ''
+        return ' Please enter a review.', 0, {}, '', '', '', ''
 
     result = run_pipeline(text)
 
-    # We handle pipeline errors gracefully in the UI
     if 'error' in result:
-        return result['error'], 0, {}, '', '', ''
+        return result['error'], 0, {}, '', '', '', ''
 
-    # We add the result to our session history
+    # We format the retrieved similar reviews for display in the UI
+    similar_text = ''
+    if result['similar_reviews']:
+        similar_text = '**Similar reviews retrieved from history:**\n\n'
+        for i, s in enumerate(result['similar_reviews'], 1):
+            similar_text += (
+                f"**{i}.** *(similarity: {s['similarity']}%)* "
+                f"→ {s['sentiment']}\n"
+                f"> {s['text'][:120]}...\n\n"
+            )
+    else:
+        similar_text = '*No similar reviews yet. Analyze more reviews to enable retrieval.*'
+
+    # We save the result to the session history
     history.append({
         'review': result['original_text'][:60] + '...',
         'sentiment': result['sentiment_label'],
@@ -34,22 +46,26 @@ def analyze(text):
         result['all_scores'],
         result['explanation'],
         result['cleaned_text'],
-        f"Detected language: {result['language'].upper()}"
+        f"Detected language: {result['language'].upper()}",
+        similar_text
     )
 
 
-# We format the session history as a table for Gradio to display
+# We format the session history as a list for the Gradio table
 def get_history():
     if not history:
         return [['—', '—', '—']]
     return [[h['review'], h['sentiment'], h['confidence']] for h in history]
 
 
-# We build the interface using Gradio Blocks for maximum layout control
+# We build the full Gradio Blocks interface
 with gr.Blocks(title='Sentiment Analyzer', theme=gr.themes.Soft()) as demo:
 
-    gr.Markdown('# Sentiment Analyzer')
-    gr.Markdown('Analyze the sentiment of any product or movie review. Powered by a local NLP pipeline using HuggingFace + Mistral via Ollama.')
+    gr.Markdown('# 🔍 Sentiment Analyzer')
+    gr.Markdown(
+        'A local NLP pipeline using **HuggingFace BERT** for classification '
+        'and **Mistral 7B via Ollama** for RAG-based explanation.'
+    )
 
     with gr.Row():
         with gr.Column(scale=2):
@@ -86,8 +102,12 @@ with gr.Blocks(title='Sentiment Analyzer', theme=gr.themes.Soft()) as demo:
 
     scores_output = gr.Label(label='All sentiment scores (%)')
 
+    # We display the RAG retrieval results so the user can see
+    # which past reviews influenced the current explanation
+    similar_output = gr.Markdown(label='Retrieved similar reviews (RAG)')
+
     explanation_output = gr.Textbox(
-        label='LLM Explanation (Mistral via Ollama)',
+        label='LLM Explanation (Mistral + RAG)',
         interactive=False,
         lines=4
     )
@@ -102,7 +122,7 @@ with gr.Blocks(title='Sentiment Analyzer', theme=gr.themes.Soft()) as demo:
         interactive=False
     )
 
-    # We connect the analyze button to the main pipeline function
+    # We wire up the analyze button to the main pipeline function
     submit_btn.click(
         fn=analyze,
         inputs=[input_text],
@@ -112,11 +132,12 @@ with gr.Blocks(title='Sentiment Analyzer', theme=gr.themes.Soft()) as demo:
             scores_output,
             explanation_output,
             cleaned_output,
-            lang_output
+            lang_output,
+            similar_output
         ]
     )
 
-    # We connect the history button to the history formatting function
+    # We wire up the history refresh button
     history_btn.click(
         fn=get_history,
         inputs=[],
@@ -124,6 +145,6 @@ with gr.Blocks(title='Sentiment Analyzer', theme=gr.themes.Soft()) as demo:
     )
 
 
-# We launch the app locally; share=False ensures it stays on our machine
+# We launch the app locally to comply with the local LLM requirement
 if __name__ == '__main__':
     demo.launch(share=False)
