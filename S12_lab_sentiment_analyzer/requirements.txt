@@ -1,0 +1,8 @@
+gradio>=4.0
+transformers>=4.40
+torch
+langdetect
+requests
+sentence-transformers
+numpy
+scikit-learn
