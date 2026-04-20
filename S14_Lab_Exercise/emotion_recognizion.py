@@ -55,7 +55,7 @@ def display_emotions(results: list) -> None:
 
 
 if __name__ == "__main__":
-    sample_path = "NLP_portfolio_Caride_Alex/S14_Lab_Exercise/local_tts_output_sad.wav"
+    sample_path = "NLP_portfolio_Caride_Alex/S14_Lab_Exercise/local_tts_output_angry.wav"
     try:
         results = predict_emotion(sample_path)
         display_emotions(results)

@@ -53,8 +53,12 @@ if __name__ == "__main__":
     # With voice_index=0 we get a Spanish voice, with voice_index=1 we get an English voice
     eng = build_engine(rate=160,voice_index=1)
     sample_text = (
-        "Hello! I really like this movie . "
-        "I was expecting it to be good, but it exceeded my expectations. "
+        "Hello! I am very angry today because I got bad news. "
+        "I hope you are having a wonderful day as well. "
+        "The reason I am so angry is because I failed my NLP course with a poor grade. "
+        "I worked really hard and I am disappointed in my achievement. "
+        "I can not wait to apply what I learned in real projects and keep improving my skills. "
+        "Thank you for listening to my angry message!"
     )
     speak_text(sample_text, eng)
-    save_speech(sample_text, "NLP_portfolio_Caride_Alex/S14_Lab_Exercise/local_tts_output_positive.wav", eng)
+    save_speech(sample_text, "NLP_portfolio_Caride_Alex/S14_Lab_Exercise/local_tts_output_angry.wav", eng)
