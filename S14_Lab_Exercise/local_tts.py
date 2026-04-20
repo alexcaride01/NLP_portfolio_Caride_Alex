@@ -50,11 +50,11 @@ def save_speech(text: str, output_path: str = "local_tts_output.wav", engine: py
 if __name__ == "__main__":
     # We demonstrate listing voices and then synthesizing a short sentence
     list_voices()
-    # With voice_index=0 we get a Spanish voice
-    eng = build_engine(rate=160,voice_index=0)
+    # With voice_index=0 we get a Spanish voice, with voice_index=1 we get an English voice
+    eng = build_engine(rate=160,voice_index=1)
     sample_text = (
-        "Hola! Esto es una demostración de texto a voz local. "
-        "Estamos ejecutando todo localmente usando pyttsx3."
+        "Hello! This is a local text to speech demonstration. "
+        "We are running entirely offline using pyttsx3."
     )
     speak_text(sample_text, eng)
-    save_speech(sample_text, "NLP_portfolio_Caride_Alex/S14_Lab_Exercise/local_tts_output_spanish.wav", eng)
+    save_speech(sample_text, "NLP_portfolio_Caride_Alex/S14_Lab_Exercise/local_tts_output_english.wav", eng)
