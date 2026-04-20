@@ -62,4 +62,4 @@ if __name__ == "__main__":
         display_transcription(result)
     except FileNotFoundError as e:
         print(f"[Local STT] Demo skipped: {e}")
-        print("[Local STT] Please provide a 'sample_audio.wav' file to test this module.")
+        print("[Local STT] Please provide a 'sample_audio.wav' file to test it.")
