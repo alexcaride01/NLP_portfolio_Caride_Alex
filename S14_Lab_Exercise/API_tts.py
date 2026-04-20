@@ -1,32 +1,43 @@
-# We use the ElevenLabs API to generate high-quality, expressive speech from text
+# We use Google Text-to-Speech (gTTS) as our external API TTS solution
 import os
-import requests
-
-ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY", "sk_b9fb47e1567746662b9d92101843f61f6059bcbeab576b3d")
-BASE_URL = "https://api.elevenlabs.io/v1"
-
-# We define a default voice ID that corresponds to the "Rachel" voice on ElevenLabs
-DEFAULT_VOICE_ID = "21m00Tcm4TlvDq8ikWAM"
-
-HEADERS = {
-    "xi-api-key": ELEVENLABS_API_KEY,
-    "Content-Type": "application/json",
-}
+from gtts import gTTS
 
 
-# We retrieve all available voices from the user's ElevenLabs account
-def list_voices() -> list:
-    if not ELEVENLABS_API_KEY:
-        print("[API TTS] WARNING: ELEVENLABS_API_KEY not set. Cannot list voices.")
-        return []
+# We synthesize text using the Google TTS API and save the resulting MP3 to disk
+def synthesize_speech(
+    text: str,
+    output_path: str = "api_tts_output.mp3",
+    lang: str = "en",
+    slow: bool = False,
+) -> str:
+    print(f"[API TTS] Requesting speech synthesis for: {text[:80]}...")
+    # We create a gTTS object with the target language and speed settings
+    tts = gTTS(text=text, lang=lang, slow=slow)
+    tts.save(output_path)
+    print(f"[API TTS] Audio saved to: {output_path} ({os.path.getsize(output_path)} bytes)")
+    return output_path
 
-    print("[API TTS] Fetching available voices from ElevenLabs...")
-    response = requests.get(f"{BASE_URL}/voices", headers={"xi-api-key": ELEVENLABS_API_KEY})
-    response.raise_for_status()
-    voices = response.json().get("voices", [])
-    print(f"[API TTS] Found {len(voices)} voice(s):")
-    for v in voices:
-        print(f"  name={v['name']}  id={v['voice_id']}")
-    return voices
+
+# We list some of the most common languages supported by gTTS
+def list_languages() -> None:
+    from gtts.lang import tts_langs
+    langs = tts_langs()
+    print("[API TTS] Available languages (sample):")
+    # We print only the first 10 so the output stays readable
+    for code, name in list(langs.items())[:10]:
+        print(f"  {code}: {name}")
+    print(f"  ... and {len(langs) - 10} more")
 
 
+if __name__ == "__main__":
+    list_languages()
+    sample_text = (
+        "Welcome to our speech project. "
+        "We are demonstrating external API text to speech using Google Text-to-Speech."
+    )
+    # We synthesize and save the audio to the project folder
+    synthesize_speech(
+        sample_text,
+        "NLP_portfolio_Caride_Alex/S14_Lab_Exercise/api_tts_output.mp3",
+        lang="en",
+    )
