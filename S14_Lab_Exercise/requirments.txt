@@ -1,0 +1,9 @@
+# We list every dependency the project needs so the environment can be reproduced exactly
+openai-whisper
+pyttsx3
+requests
+torch
+torchaudio
+speechbrain
+gtts
+numpy
